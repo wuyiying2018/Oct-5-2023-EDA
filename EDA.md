@@ -56,7 +56,8 @@ weather_df |>
 
     ## Warning: Removed 15 rows containing non-finite values (`stat_bin()`).
 
-![](EDA_files/figure-gfm/unnamed-chunk-2-1.png)<!-- --> heavy skewed
+<img src="EDA_files/figure-gfm/unnamed-chunk-2-1.png" width="90%" />
+heavy skewed
 
 Here are data outliers
 
@@ -79,7 +80,7 @@ weather_df |>
   geom_point(alpha = .75)
 ```
 
-![](EDA_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+<img src="EDA_files/figure-gfm/unnamed-chunk-4-1.png" width="90%" />
 
 ## `group by`
 
@@ -229,7 +230,7 @@ weather_df |>
     ## `summarise()` has grouped output by 'name'. You can override using the
     ## `.groups` argument.
 
-![](EDA_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+<img src="EDA_files/figure-gfm/unnamed-chunk-10-1.png" width="90%" />
 `knitr::kable(digits=2)`: put the result into tables
 
 ``` r
@@ -272,3 +273,19 @@ weather_df |>
 | 2022-10-01 |          17.43 |      29.22 |        11.88 |
 | 2022-11-01 |          14.02 |      27.96 |         2.14 |
 | 2022-12-01 |           6.76 |      27.35 |        -0.46 |
+
+## Grouped mutate
+
+``` r
+weather_df |>
+  group_by(name) |>
+  mutate(
+    mean_tmax = mean(tmax, na.rm = TRUE),
+    centered_tmax = tmax - mean_tmax) |> 
+  ggplot(aes(x = date, y = centered_tmax, color = name)) + 
+    geom_point() 
+```
+
+    ## Warning: Removed 17 rows containing missing values (`geom_point()`).
+
+<img src="EDA_files/figure-gfm/unnamed-chunk-12-1.png" width="90%" />
