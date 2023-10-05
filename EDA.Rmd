@@ -53,3 +53,54 @@ weather_df |>
   geom_point(alpha = .75)
 ```
 
+## `group by`
+```{r}
+weather_df |>
+  group_by(name, month)
+```
+it is sometimes necessary to remove groups using `ungroup()`.
+
+## Counting things
+`summarize`
+```{r}
+weather_df |>
+  group_by(month) |>
+  summarize(n_obs = n())
+```
+group by more than one variable
+```{r}
+weather_df |>
+  group_by(name, month) |>
+  summarize(n_obs = n())
+```
+
+```{r}
+weather_df |>
+  count(name, month) |>
+  pivot_wider(
+    names_from=name,
+    values_from=n
+  )
+```
+
+## General summaries
+`summarize()`
+```{r}
+weather_df |>
+  group_by(name,month) |>
+  summarize(
+    mean_tmax = mean(tmax, na.rm = TRUE),
+    mean_prec = mean(prcp, na.rm = TRUE),
+    median_tmax = median(tmax),
+    sd_tmax = sd(tmax))
+```
+create a plot based on the monthly summary
+```{r}
+weather_df |>
+  group_by(name, month) |>
+  summarize(mean_tmax = mean(tmax, na.rm = TRUE)) |>
+  ggplot(aes(x = month, y = mean_tmax, color = name)) + 
+    geom_point() + geom_line() + 
+    theme(legend.position = "bottom")
+```
+
