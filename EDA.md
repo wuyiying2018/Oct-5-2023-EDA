@@ -294,6 +294,10 @@ weather_df |>
 
 keep only the day with the lowest max temperature within each month:
 
+`min_rank()` function is a function that returns the same values as rank
+when the ties_method is set to “min”, that is, ties are assigned the
+minimum ranking possible
+
 ``` r
 weather_df |>
   group_by(name, month) |>
