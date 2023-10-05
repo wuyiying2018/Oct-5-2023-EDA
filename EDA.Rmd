@@ -142,3 +142,32 @@ weather_df |>
     geom_point() 
 ```
 
+## Window functions
+keep only the day with the lowest max temperature within each month:
+```{r}
+weather_df |>
+  group_by(name, month) |>
+  mutate(temp_ranking = min_rank(tmax))|>
+  filter(min_rank(tmax) < 2)
+```
+`lag`,: compare an observation to it’s previous value. This is useful, for example, to find the day-by-day change in max temperature within each station over the year:
+
+`lag(tmax,3)`: get the tmax 3 rows before the record
+
+always remember to `group_by`!
+```{r}
+weather_df |>
+  group_by(name) |>
+  mutate(temp_change = tmax - lag(tmax),
+         yesterday_tmax=lag(tmax))
+```
+This kind of variable might be used to quantify the day-by-day variability in max temperature, or to identify the largest one-day increase:
+```{r}
+weather_df |>
+  group_by(name) |>
+  mutate(temp_change = tmax - lag(tmax)) |>
+  summarize(
+    temp_change_sd = sd(temp_change, na.rm = TRUE),
+    temp_change_max = max(temp_change, na.rm = TRUE))
+```
+

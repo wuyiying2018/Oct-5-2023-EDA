@@ -289,3 +289,82 @@ weather_df |>
     ## Warning: Removed 17 rows containing missing values (`geom_point()`).
 
 <img src="EDA_files/figure-gfm/unnamed-chunk-12-1.png" width="90%" />
+
+## Window functions
+
+keep only the day with the lowest max temperature within each month:
+
+``` r
+weather_df |>
+  group_by(name, month) |>
+  mutate(temp_ranking = min_rank(tmax))|>
+  filter(min_rank(tmax) < 2)
+```
+
+    ## # A tibble: 92 × 8
+    ## # Groups:   name, month [72]
+    ##    name           id        date        prcp  tmax  tmin month      temp_ranking
+    ##    <chr>          <chr>     <date>     <dbl> <dbl> <dbl> <date>            <int>
+    ##  1 CentralPark_NY USW00094… 2021-01-29     0  -3.8  -9.9 2021-01-01            1
+    ##  2 CentralPark_NY USW00094… 2021-02-08     0  -1.6  -8.2 2021-02-01            1
+    ##  3 CentralPark_NY USW00094… 2021-03-02     0   0.6  -6   2021-03-01            1
+    ##  4 CentralPark_NY USW00094… 2021-04-02     0   3.9  -2.1 2021-04-01            1
+    ##  5 CentralPark_NY USW00094… 2021-05-29   117  10.6   8.3 2021-05-01            1
+    ##  6 CentralPark_NY USW00094… 2021-05-30   226  10.6   8.3 2021-05-01            1
+    ##  7 CentralPark_NY USW00094… 2021-06-11     0  20.6  16.7 2021-06-01            1
+    ##  8 CentralPark_NY USW00094… 2021-06-12     0  20.6  16.7 2021-06-01            1
+    ##  9 CentralPark_NY USW00094… 2021-07-03    86  18.9  15   2021-07-01            1
+    ## 10 CentralPark_NY USW00094… 2021-08-04     0  24.4  19.4 2021-08-01            1
+    ## # ℹ 82 more rows
+
+`lag`,: compare an observation to it’s previous value. This is useful,
+for example, to find the day-by-day change in max temperature within
+each station over the year:
+
+`lag(tmax,3)`: get the tmax 3 rows before the record
+
+always remember to `group_by`!
+
+``` r
+weather_df |>
+  group_by(name) |>
+  mutate(temp_change = tmax - lag(tmax),
+         yesterday_tmax=lag(tmax))
+```
+
+    ## # A tibble: 2,190 × 9
+    ## # Groups:   name [3]
+    ##    name           id         date        prcp  tmax  tmin month      temp_change
+    ##    <chr>          <chr>      <date>     <dbl> <dbl> <dbl> <date>           <dbl>
+    ##  1 CentralPark_NY USW000947… 2021-01-01   157   4.4   0.6 2021-01-01      NA    
+    ##  2 CentralPark_NY USW000947… 2021-01-02    13  10.6   2.2 2021-01-01       6.2  
+    ##  3 CentralPark_NY USW000947… 2021-01-03    56   3.3   1.1 2021-01-01      -7.3  
+    ##  4 CentralPark_NY USW000947… 2021-01-04     5   6.1   1.7 2021-01-01       2.8  
+    ##  5 CentralPark_NY USW000947… 2021-01-05     0   5.6   2.2 2021-01-01      -0.5  
+    ##  6 CentralPark_NY USW000947… 2021-01-06     0   5     1.1 2021-01-01      -0.600
+    ##  7 CentralPark_NY USW000947… 2021-01-07     0   5    -1   2021-01-01       0    
+    ##  8 CentralPark_NY USW000947… 2021-01-08     0   2.8  -2.7 2021-01-01      -2.2  
+    ##  9 CentralPark_NY USW000947… 2021-01-09     0   2.8  -4.3 2021-01-01       0    
+    ## 10 CentralPark_NY USW000947… 2021-01-10     0   5    -1.6 2021-01-01       2.2  
+    ## # ℹ 2,180 more rows
+    ## # ℹ 1 more variable: yesterday_tmax <dbl>
+
+This kind of variable might be used to quantify the day-by-day
+variability in max temperature, or to identify the largest one-day
+increase:
+
+``` r
+weather_df |>
+  group_by(name) |>
+  mutate(temp_change = tmax - lag(tmax)) |>
+  summarize(
+    temp_change_sd = sd(temp_change, na.rm = TRUE),
+    temp_change_max = max(temp_change, na.rm = TRUE))
+```
+
+    ## # A tibble: 3 × 3
+    ##   name           temp_change_sd temp_change_max
+    ##   <chr>                   <dbl>           <dbl>
+    ## 1 CentralPark_NY           4.43            12.2
+    ## 2 Molokai_HI               1.24             5.6
+    ## 3 Waterhole_WA             3.04            11.1
